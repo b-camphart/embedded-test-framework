@@ -79,7 +79,7 @@ const reporter = new ConsoleReporter();
 ```
 Finally, use the `enqueueSuite` function to enqueue the test suite for execution. This function returns a function that can be called to start running the tests:
 ```typescript
-import { enqueueSuite } from 'run/enqueuSuite';
+import { enqueueSuite } from 'run/enqueueSuite';
 
 const run = enqueueSuite("", suite.definition(), reporter);
 
