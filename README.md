@@ -88,7 +88,7 @@ run(reporter, [], []);
 ```
 You can pass an empty string "" as the identifier for the test suite. Optionally, you can provide beforeEach and afterEach functions to set up and tear down the entire test environment.
 
-## Cusomization
+## Customization
 Feel free to customize the library by creating your own implementations of test suites, reporters, or other components. The modular design of the library allows for flexibility and extensibility to suit your specific testing requirements.
 
 ## Contribution
