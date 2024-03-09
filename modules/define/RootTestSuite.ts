@@ -13,8 +13,6 @@ export default class RootTestSuite implements TestSuite {
 	private current: ParentSuite = this.root;
 
 	constructor(private name: string = "") {
-		this.describe = this.describe.bind(this);
-		this.it = this.it.bind(this);
 	}
 
 	describe(name: string, fn: () => void): void {
