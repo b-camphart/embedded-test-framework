@@ -1,7 +1,8 @@
+import { AfterEachFn, BeforeEachFn } from "../define/DefinedSuite";
 import { DefinedTest } from "../define/DefinedTest";
 import { EnqueueReporter } from "../report/EnqueueReporter";
 import { TestReporter } from "../report/TestReporter";
-import { EnqueuedTest } from "./EnqueuedTest";
+import { EnqueuedTest, PotentialFailure } from "./EnqueuedTest";
 
 /**
  * Prepares the test for a future run.
@@ -22,33 +23,35 @@ export function enqueueTest(
 ): EnqueuedTest {
 	reporter.onTestEnqueued(id, test.name);
 
-	return async function (
+	return async function runTest(
 		reporter: TestReporter,
-		beforeEach: readonly (() => Promise<void> | void)[],
-		afterEach: readonly (() => Promise<void> | void)[],
+		beforeEach: readonly BeforeEachFn[],
+		afterEach: readonly AfterEachFn[],
 	) {
 		reporter.onStartTest(id);
-		let failure: any | undefined;
+		let failure: PotentialFailure;
 		try {
+			// If any of these throw, this block exits.
 			for (const fn of beforeEach) {
 				await fn();
 			}
+			// Run the test if all `beforeEach` fns have succeeded.
 			await test.run();
 		} catch (thrown) {
 			failure = thrown;
-			throw thrown;
-		} finally {
-			let afterTestFailure: any | undefined;
-			for (const fn of afterEach) {
-				try {
-					await fn();
-				} catch (thrown) {
-					afterTestFailure = thrown;
-				}
-			}
-
-			reporter.onEndTest(id, failure, afterTestFailure);
 		}
+
+		let afterTestFailure: PotentialFailure;
+		for (const fn of afterEach) {
+			try {
+				await fn();
+			} catch (thrown) {
+				afterTestFailure = thrown;
+			}
+		}
+
+		reporter.onEndTest(id, failure, afterTestFailure);
+
+		return failure;
 	};
 }
-
