@@ -77,7 +77,7 @@ export default class ConsoleReporter implements SuiteReporter, EnqueueReporter {
 	onEndSuite(
 		id: string,
 		childFailures: readonly any[],
-		afterAllFailure: any | undefined,
+		afterAllFailures: readonly any[],
 	): void {}
 }
 

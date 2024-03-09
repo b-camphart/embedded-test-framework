@@ -6,6 +6,6 @@ export interface SuiteReporter extends TestReporter {
 	onEndSuite(
 		id: string,
 		childFailures: readonly any[],
-		afterAllFailure: any | undefined,
+		afterAllFailures: readonly any[],
 	): void;
 }

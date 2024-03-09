@@ -1,7 +1,8 @@
-import { DefinedSuite } from "../define/DefinedSuite";
+import { AfterEachFn, BeforeEachFn, DefinedSuite } from "../define/DefinedSuite";
 import { EnqueueReporter } from "../report/EnqueueReporter";
 import { SuiteReporter } from "../report/SuiteReporter";
 import { EnqueuedSuite } from "./EnqueuedSuite";
+import { PotentialFailure } from "./EnqueuedTest";
 import { enqueueTest } from "./enqueueTest";
 
 /**
@@ -11,8 +12,9 @@ import { enqueueTest } from "./enqueueTest";
  * as failed, and no other `beforeAll` functions will be called.
  *
  * Every `afterAll` function will be run, regardless of test failure, or
- * individual `afterAll` failures.  The final failure from failed `afterAll`
- * functions will be reported, along with any failures of children.
+ * individual `afterAll` failures.  All failures from the `afterAll`
+ * functions, and any failures from direct descendent tests, will be 
+ * reported.
  */
 export function enqueueSuite(
 	id: string,
@@ -31,17 +33,17 @@ export function enqueueSuite(
 
 	reporter.onSuiteEnqueued(id);
 
-	return async function (
+	return async function runSuite(
 		reporter: SuiteReporter,
-		beforeEach: readonly (() => Promise<void> | void)[],
-		afterEach: readonly (() => Promise<void> | void)[],
+		beforeEach: readonly BeforeEachFn[],
+		afterEach: readonly AfterEachFn[],
 	) {
 		reporter.onStartSuite(id);
 
 		const combinedBeforeEach = beforeEach.concat(suite.beforeEach);
 		const combinedAfterEach = suite.afterEach.concat(afterEach);
 
-		let beforeAllFailure: any | undefined;
+		let beforeAllFailure: PotentialFailure;
 		try {
 			for (const fn of suite.beforeAll) {
 				await fn();
@@ -58,24 +60,34 @@ export function enqueueSuite(
 
 		const childFailures: any[] = [];
 		for (const fn of enqueuedChildren) {
+			let failure: PotentialFailure;
 			try {
-				await fn(reporter, combinedBeforeEach, combinedAfterEach);
+				failure = await fn(
+					reporter,
+					combinedBeforeEach,
+					combinedAfterEach,
+				);
 			} catch (thrown) {
 				childFailures.push(thrown);
 				reporter.onChildFailure(thrown);
+				continue;
+			}
+			if (failure) {
+				childFailures.push(failure);
+				reporter.onChildFailure(failure);
 			}
 		}
 
-		let afterAllFailure: any | undefined;
+		let afterAllFailures: any[] = [];
 		for (const fn of suite.afterAll) {
 			try {
 				await fn();
 			} catch (thrown) {
-				afterAllFailure = thrown;
+				afterAllFailures.push(thrown);
 			}
 		}
 
-		reporter.onEndSuite(id, childFailures, afterAllFailure);
+		reporter.onEndSuite(id, childFailures, afterAllFailures);
 	};
 }
 
