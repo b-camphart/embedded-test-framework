@@ -1,4 +1,6 @@
+import { Awaitable } from "./Awaitable";
+
 export type DefinedTest = {
     readonly name: string;
-    run(): Promise<void> | void;
+    run(): Awaitable<void>;
 }

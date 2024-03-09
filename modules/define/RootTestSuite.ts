@@ -1,5 +1,12 @@
-import { DefinedSuite } from "./DefinedSuite";
-import TestSuite from "./TestSuite";
+import { Awaitable } from "./Awaitable";
+import {
+	AfterAllFn,
+	AfterEachFn,
+	BeforeAllFn,
+	BeforeEachFn,
+	DefinedSuite,
+} from "./DefinedSuite";
+import TestSuite, { TestFn } from "./TestSuite";
 
 export default class RootTestSuite implements TestSuite {
 	private readonly root: ParentSuite = {
@@ -12,8 +19,7 @@ export default class RootTestSuite implements TestSuite {
 
 	private current: ParentSuite = this.root;
 
-	constructor(private name: string = "") {
-	}
+	constructor(private name: string = "") {}
 
 	describe(name: string, fn: () => void): void {
 		const parent = this.current;
@@ -25,14 +31,14 @@ export default class RootTestSuite implements TestSuite {
 			beforeEach: [],
 			afterEach: [],
 			afterAll: [],
-		}
+		};
 		parent.children.push(child);
 		this.current = child;
 		fn();
 		this.current = parent;
 	}
 
-	it(name: string, fn: () => void | Promise<void>): void {
+	it(name: string, fn: TestFn): void {
 		const test: Test = {
 			name,
 			parent: this.current,
@@ -41,37 +47,37 @@ export default class RootTestSuite implements TestSuite {
 		this.current.children.push(test);
 	}
 
-	beforeAll(fn: () => void | Promise<void>): void {
+	beforeAll(fn: BeforeAllFn): void {
 		this.current.beforeAll.push(fn);
 	}
 
-	beforeEach(fn: () => void | Promise<void>): void {
+	beforeEach(fn: BeforeEachFn): void {
 		this.current.beforeEach.push(fn);
 	}
 
-	afterEach(fn: () => void | Promise<void>): void {
+	afterEach(fn: AfterEachFn): void {
 		this.current.afterEach.push(fn);
 	}
 
-	afterAll(fn: () => void | Promise<void>): void {
+	afterAll(fn: AfterAllFn): void {
 		this.current.afterAll.push(fn);
 	}
 
-    definition(): DefinedSuite {
-        return {
-            ...this.root,
-            name: this.name,
-        }
-    }
+	definition(): DefinedSuite {
+		return {
+			...this.root,
+			name: this.name,
+		};
+	}
 }
 
 type Suite = {
 	readonly name: string;
 	children: (ChildSuite | Test)[];
-	beforeAll: (() => Promise<void> | void)[];
-	beforeEach: (() => Promise<void> | void)[];
-	afterEach: (() => Promise<void> | void)[];
-	afterAll: (() => Promise<void> | void)[];
+	beforeAll: BeforeAllFn[];
+	beforeEach: BeforeEachFn[];
+	afterEach: AfterEachFn[];
+	afterAll: AfterAllFn[];
 };
 
 type ParentSuite = Omit<Suite, "name">;
@@ -83,5 +89,5 @@ type ChildSuite = Suite & {
 type Test = {
 	readonly name: string;
 	readonly parent: ParentSuite;
-	run(): Promise<void> | void;
+	run(): Awaitable<void>;
 };

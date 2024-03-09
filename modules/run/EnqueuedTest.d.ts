@@ -1,7 +1,10 @@
+import { AfterEachFn, BeforeEachFn } from "../define/DefinedSuite";
 import { TestReporter } from "../report/TestReporter";
 
 export type EnqueuedTest = (
 	reporter: TestReporter,
-	beforeEach: readonly (() => Promise<void> | void)[],
-	afterEach: readonly (() => Promise<void> | void)[],
-) => Promise<void>;
+	beforeEach: readonly BeforeEachFn[],
+	afterEach: readonly AfterEachFn[],
+) => Promise<PotentialFailure>;
+
+type PotentialFailure = any | undefined;
