@@ -69,6 +69,18 @@ export default class RootTestSuite implements TestSuite {
 			name: this.name,
 		};
 	}
+
+	bound(): TestSuite {
+		return {
+			describe: this.describe.bind(this),
+			it: this.it.bind(this),
+			beforeAll: this.beforeAll.bind(this),
+			beforeEach: this.beforeEach.bind(this),
+			afterEach: this.afterEach.bind(this),
+			afterAll: this.afterAll.bind(this),
+		}
+	}
+
 }
 
 type Suite = {
