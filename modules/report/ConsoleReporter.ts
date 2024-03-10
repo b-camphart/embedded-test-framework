@@ -67,6 +67,7 @@ export default class ConsoleReporter implements SuiteReporter, EnqueueReporter {
         const name = structure?.fullName() ?? "";
         if (!!result) {
             console.log("failed", name);
+			console.error(result);
         } else if (this.verbose) {
             console.log("passed", name);
         }
