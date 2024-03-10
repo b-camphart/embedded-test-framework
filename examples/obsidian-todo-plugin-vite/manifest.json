@@ -1,0 +1,18 @@
+{
+
+  "id": "obsidian-todo-plugin-vite",
+
+  "name": "Obsidian Todo Plugin Vite",
+
+  "version": "0.0.0",
+
+  "minAppVersion": "1.4.14",
+
+  "description": "An example plugin for obsidian that uses the embedded testing framework for running integration tests.",
+
+  "author": "b-camphart",
+
+  "authorUrl": "https://github.com/b-camphart",
+
+  "isDesktopOnly": true
+}
