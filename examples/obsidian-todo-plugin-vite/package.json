@@ -10,7 +10,7 @@
     "test:int": "vite build --mode integration --watch",
     "dev": "vite build --mode development --watch",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "version": "node src/obsidian/version-bump.js"
   },
   "devDependencies": {
     "typescript": "^5.2.2",

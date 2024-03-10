@@ -1,4 +1,27 @@
-import { name as packageName, version, description, author } from "../../package.json"
+import { readFileSync } from "fs"
+
+let { 
+    name: packageName, 
+    version, 
+    description, 
+    author
+} = JSON.parse(readFileSync("package.json", { encoding: "utf-8"}));
+
+if (!packageName || typeof packageName !== "string") {
+    throw new Error("package.json missing required field 'name'.")
+}
+
+if (!version || typeof version !== "string") {
+    version = null;
+}
+
+if (!description || typeof description !== "string") {
+    throw new Error("package.json does not have valid description.  Required for obsidian plugins.")
+}
+
+if (!author || typeof author !== "string") {
+    throw new Error("package.json does not have valid author.  Required for obsidian plugins.")
+}
 
 export default {
     "id": packageName,
